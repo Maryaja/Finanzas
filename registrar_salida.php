@@ -1,0 +1,66 @@
+<?php
+session_start();
+require 'db/conexion.php';
+require 'clases/Salidas.php';
+
+// Verificar si el usuario ha iniciado sesión
+if (!isset($_SESSION['usuario'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$mensaje = "";
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $tipo = $_POST['tipo'];
+    $monto = $_POST['monto'];
+    $fecha = $_POST['fecha'];
+
+    // Guardar la imagen de la factura
+    $nombreArchivo = $_FILES['factura']['name'];
+    $rutaTemporal = $_FILES['factura']['tmp_name'];
+    $rutaDestino = 'uploads/' . basename($nombreArchivo);
+
+    if (move_uploaded_file($rutaTemporal, $rutaDestino)) {
+        $salida = new Salidas($db);
+        $salida->registrarSalida($tipo, $monto, $fecha, $rutaDestino);
+        $mensaje = "Salida registrada correctamente.";
+    } else {
+        $mensaje = "Error al subir la imagen de la factura.";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Salida</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h2>Registrar Nueva Salida</h2>
+
+    <?php if ($mensaje): ?>
+        <p><?php echo $mensaje; ?></p>
+    <?php endif; ?>
+
+    <form method="POST" action="registrar_salida.php" enctype="multipart/form-data">
+        <label for="tipo">Tipo de Salida:</label>
+        <input type="text" name="tipo" required><br><br>
+
+        <label for="monto">Monto:</label>
+        <input type="number" step="0.01" name="monto" required><br><br>
+
+        <label for="fecha">Fecha:</label>
+        <input type="date" name="fecha" required><br><br>
+
+        <label for="factura">Factura (imagen):</label>
+        <input type="file" name="factura" accept="image/*" required><br><br>
+
+        <button type="submit">Registrar Salida</button>
+    </form>
+
+    <p><a href="dashboard.php">← Volver al menú</a></p>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
-$usuario = "root";
-$contrasena = ""; // Deja esto vacío si no tienes contraseña en XAMPP
+$usuario = "admin";
+$contrasena = "1234"; 
 $base_de_datos = "finanzas";
 
 // Crear conexión
