@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
-$usuario = "admin";
-$contrasena = "1234"; 
+$usuario = "root";
+$contrasena = ""; 
 $base_de_datos = "finanzas";
 
 // Crear conexión
