@@ -1,4 +1,4 @@
-<?php
+ <?php
 session_start();
 require 'db/conexion.php';
 require 'clases/ReporteBalance.php';
@@ -160,6 +160,9 @@ $salidas = $reporte->obtenerSalidas();
             document.getElementById("modal").style.display = "none";
         }
     </script>
+<form action="generar_pdf.php" method="post" style="margin-bottom: 20px;">
+    <button type="submit">📄 Descargar Balance en PDF</button>
+</form>
 
     <p><a href="dashboard.php">← Volver al menú</a></p>
 </body>
