@@ -42,5 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php if ($mensaje): ?>
         <p style="color:red;"><?php echo $mensaje; ?></p>
     <?php endif; ?>
+
+    <p><a href="registrar_usuario.php">¿No tienes cuenta? Regístrate aquí</a></p>
 </body>
 </html>
+

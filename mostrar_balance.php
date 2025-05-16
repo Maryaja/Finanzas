@@ -1,28 +1,33 @@
 <?php
 session_start();
 require 'db/conexion.php';
-require 'clases/Salidas.php';
+require 'clases/ReporteBalance.php';
 
-// Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['usuario'])) {
     header('Location: login.php');
     exit;
 }
 
-$salidas = new Salidas($db);
-$listaSalidas = $salidas->obtenerSalidas();
+$reporte = new ReporteBalance($db);
+$totalEntradas = $reporte->obtenerTotalEntradas();
+$totalSalidas = $reporte->obtenerTotalSalidas();
+$balance = $reporte->obtenerBalance();
+$entradas = $reporte->obtenerEntradas();
+$salidas = $reporte->obtenerSalidas();
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ver Salidas</title>
+    <title>Mostrar Balance</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 30px;
         }
 
         th, td {
@@ -67,8 +72,32 @@ $listaSalidas = $salidas->obtenerSalidas();
     </style>
 </head>
 <body>
-    <h2>Salidas Registradas</h2>
+    <h2>Balance Financiero</h2>
 
+    <p><strong>Total de Entradas:</strong> $<?php echo number_format($totalEntradas, 2); ?></p>
+    <p><strong>Total de Salidas:</strong> $<?php echo number_format($totalSalidas, 2); ?></p>
+    <p><strong>Balance:</strong> $<?php echo number_format($balance, 2); ?></p>
+
+    <canvas id="balanceChart" width="400" height="400"></canvas>
+    <script>
+        var ctx = document.getElementById('balanceChart').getContext('2d');
+        var balanceChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Entradas', 'Salidas'],
+                datasets: [{
+                    data: [<?php echo $totalEntradas; ?>, <?php echo $totalSalidas; ?>],
+                    backgroundColor: ['#4CAF50', '#F44336'],
+                    hoverBackgroundColor: ['#66BB6A', '#EF5350']
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+
+    <h3>Entradas</h3>
     <table>
         <thead>
             <tr>
@@ -79,7 +108,31 @@ $listaSalidas = $salidas->obtenerSalidas();
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($listaSalidas as $salida): ?>
+            <?php foreach ($entradas as $entrada): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($entrada['tipo']); ?></td>
+                    <td>$<?php echo number_format($entrada['monto'], 2); ?></td>
+                    <td><?php echo $entrada['fecha']; ?></td>
+                    <td>
+                        <img src="<?php echo $entrada['factura']; ?>" alt="Factura" onclick="mostrarImagen(this.src)">
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <h3>Salidas</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Factura</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($salidas as $salida): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($salida['tipo']); ?></td>
                     <td>$<?php echo number_format($salida['monto'], 2); ?></td>
