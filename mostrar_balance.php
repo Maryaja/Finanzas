@@ -1,4 +1,4 @@
- <?php
+<?php
 session_start();
 require 'db/conexion.php';
 require 'clases/ReporteBalance.php';
@@ -69,6 +69,13 @@ $salidas = $reporte->obtenerSalidas();
             font-weight: bold;
             cursor: pointer;
         }
+
+        /* Contenedor para la gráfica */
+        #chart-container {
+            max-width: 600px;
+            height: 400px;
+            margin: 0 auto 30px;
+        }
     </style>
 </head>
 <body>
@@ -78,7 +85,10 @@ $salidas = $reporte->obtenerSalidas();
     <p><strong>Total de Salidas:</strong> $<?php echo number_format($totalSalidas, 2); ?></p>
     <p><strong>Balance:</strong> $<?php echo number_format($balance, 2); ?></p>
 
-    <canvas id="balanceChart" width="400" height="400"></canvas>
+    <div id="chart-container">
+        <canvas id="balanceChart"></canvas>
+    </div>
+
     <script>
         var ctx = document.getElementById('balanceChart').getContext('2d');
         var balanceChart = new Chart(ctx, {
@@ -92,7 +102,8 @@ $salidas = $reporte->obtenerSalidas();
                 }]
             },
             options: {
-                responsive: true
+                responsive: true,
+                maintainAspectRatio: false
             }
         });
     </script>
@@ -160,9 +171,10 @@ $salidas = $reporte->obtenerSalidas();
             document.getElementById("modal").style.display = "none";
         }
     </script>
-<form action="generar_pdf.php" method="post" style="margin-bottom: 20px;">
-    <button type="submit">📄 Descargar Balance en PDF</button>
-</form>
+
+    <form action="generar_pdf.php" method="post" style="margin-bottom: 20px;">
+        <button type="submit">📄 Descargar Balance en PDF</button>
+    </form>
 
     <p><a href="dashboard.php">← Volver al menú</a></p>
 </body>
