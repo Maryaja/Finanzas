@@ -2,7 +2,7 @@
 <?php
 require 'db/conexion.php';
 require 'clases/ReporteBalance.php';
-require 'fpdf/fpdf.php'; // Asegúrate de que la ruta sea correcta
+require 'fpdf/fpdf.php'; 
 
 
 session_start();
