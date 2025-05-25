@@ -1,4 +1,5 @@
 <?php
+// Archivo: login.php
 session_start();
 require 'db/conexion.php';
 require 'clases/Login.php';
@@ -10,8 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $usuario = $_POST['usuario'];
     $contrasena = $_POST['contrasena'];
 
-    if ($login->autenticar($usuario, $contrasena)) {
-        $_SESSION['usuario'] = $usuario;
+    // Llamar a la función autenticar y guardar el resultado (que ahora será el usuario_id o false)
+    $usuario_id = $login->autenticar($usuario, $contrasena);
+
+    if ($usuario_id) {
+        $_SESSION['usuario'] = $usuario; // Guardar el nombre de usuario (opcional)
+        $_SESSION['usuario_id'] = $usuario_id; // Guardar el ID del usuario en la sesión
         header('Location: dashboard.php');
         exit;
     } else {
@@ -46,4 +51,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <p><a href="registrar_usuario.php">¿No tienes cuenta? Regístrate aquí</a></p>
 </body>
 </html>
-

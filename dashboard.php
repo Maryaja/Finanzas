@@ -13,7 +13,7 @@ if (!isset($_SESSION['usuario'])) {
 <head>
     <meta charset="UTF-8">
     <title>Panel de Control</title>
-       <link rel="stylesheet" href="css/styles.css">
+        <link rel="stylesheet" href="css/styles.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
         .dashboard-container {

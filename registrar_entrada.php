@@ -3,11 +3,12 @@ session_start();
 require 'db/conexion.php';
 require 'clases/Entradas.php';
 
-// Verificar si el usuario ha iniciado sesión
-if (!isset($_SESSION['usuario'])) {
+// Verificar si el usuario ha iniciado sesión y obtener el usuario_id
+if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
     exit;
 }
+$usuario_id = $_SESSION['usuario_id'];
 
 $mensaje = "";
 
@@ -22,7 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $rutaDestino = 'uploads/' . basename($nombreArchivo);
 
     if (move_uploaded_file($rutaTemporal, $rutaDestino)) {
-        $entrada = new Entradas($db);
+        // Instanciar la clase Entradas PASANDO la conexión y el usuario_id
+        $entrada = new Entradas($db, $usuario_id);
         $entrada->registrarEntrada($tipo, $monto, $fecha, $rutaDestino);
         $mensaje = "Entrada registrada correctamente.";
     } else {

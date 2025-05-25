@@ -3,12 +3,15 @@ session_start();
 require 'db/conexion.php';
 require 'clases/ReporteBalance.php';
 
-if (!isset($_SESSION['usuario'])) {
+// Verificar si el usuario ha iniciado sesión y obtener el usuario_id
+if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
     exit;
 }
+$usuario_id = $_SESSION['usuario_id'];
 
-$reporte = new ReporteBalance($db);
+// Instanciar la clase ReporteBalance PASANDO la conexión y el usuario_id
+$reporte = new ReporteBalance($db, $usuario_id);
 $totalEntradas = $reporte->obtenerTotalEntradas();
 $totalSalidas = $reporte->obtenerTotalSalidas();
 $balance = $reporte->obtenerBalance();

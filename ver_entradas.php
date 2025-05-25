@@ -3,14 +3,20 @@ session_start();
 require 'db/conexion.php';
 require 'clases/Entradas.php';
 
-// Verificar si el usuario ha iniciado sesión
-if (!isset($_SESSION['usuario'])) {
+if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
     exit;
 }
+$usuario_id = $_SESSION['usuario_id'];
 
-$entradas = new Entradas($db);
+$entradas = new Entradas($db, $usuario_id);
 $listaEntradas = $entradas->obtenerEntradas();
+
+$mensaje_eliminacion = "";
+if (isset($_SESSION['mensaje_eliminacion'])) {
+    $mensaje_eliminacion = $_SESSION['mensaje_eliminacion'];
+    unset($_SESSION['mensaje_eliminacion']); // Limpiar el mensaje de sesión
+}
 ?>
 
 <!DOCTYPE html>
@@ -20,77 +26,47 @@ $listaEntradas = $entradas->obtenerEntradas();
     <title>Ver Entradas</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 8px;
-            border: 1px solid #ccc;
+        th.eliminar-col, td.eliminar-col {
+            width: 50px;
             text-align: center;
-        }
-
-        img {
-            width: 100px;
-            cursor: pointer;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            padding-top: 60px;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.8);
-        }
-
-        .modal-content {
-            margin: auto;
-            display: block;
-            max-width: 80%;
-        }
-
-        .close {
-            position: absolute;
-            top: 30px;
-            right: 35px;
-            color: #fff;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <h2>Entradas Registradas</h2>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Tipo</th>
-                <th>Monto</th>
-                <th>Fecha</th>
-                <th>Factura</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($listaEntradas as $entrada): ?>
+    <?php if ($mensaje_eliminacion): ?>
+        <p class="mensaje-eliminacion <?php echo (strpos($mensaje_eliminacion, 'Error') === 0) ? 'error' : 'exito'; ?>"><?php echo $mensaje_eliminacion; ?></p>
+    <?php endif; ?>
+
+    <form method="post" action="eliminar_registros.php">
+        <input type="hidden" name="tipo" value="entrada">
+        <table>
+            <thead>
                 <tr>
-                    <td><?php echo htmlspecialchars($entrada['tipo']); ?></td>
-                    <td>$<?php echo number_format($entrada['monto'], 2); ?></td>
-                    <td><?php echo $entrada['fecha']; ?></td>
-                    <td>
-                        <img src="<?php echo $entrada['factura']; ?>" alt="Factura" onclick="mostrarImagen(this.src)">
-                    </td>
+                    <th class="eliminar-col"><input type="checkbox" id="seleccionar_todas_entradas"></th>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Fecha</th>
+                    <th>Factura</th>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php foreach ($listaEntradas as $entrada): ?>
+                    <tr>
+                        <td class="eliminar-col"><input type="checkbox" name="eliminar[]" value="<?php echo $entrada['id']; ?>"></td>
+                        <td><?php echo htmlspecialchars($entrada['tipo']); ?></td>
+                        <td>$<?php echo number_format($entrada['monto'], 2); ?></td>
+                        <td><?php echo $entrada['fecha']; ?></td>
+                        <td>
+                            <img src="<?php echo $entrada['factura']; ?>" alt="Factura" onclick="mostrarImagen(this.src)">
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar los registros seleccionados?')">Eliminar Seleccionados</button>
+    </form>
 
     <div id="modal" class="modal" onclick="cerrarModal()">
         <span class="close">&times;</span>
@@ -99,13 +75,32 @@ $listaEntradas = $entradas->obtenerEntradas();
 
     <script>
         function mostrarImagen(src) {
-            document.getElementById("imagenAmpliada").src = src;
-            document.getElementById("modal").style.display = "block";
+            var modal = document.getElementById("modal");
+            var modalImg = document.getElementById("imagenAmpliada");
+            modalImg.src = src;
+            modal.style.display = "block";
+            modalImg.style.marginTop = Math.max(0, (window.innerHeight - modalImg.offsetHeight) / 2) + "px"; // Centrar verticalmente
         }
 
         function cerrarModal() {
             document.getElementById("modal").style.display = "none";
         }
+
+        // Cerrar el modal haciendo clic fuera de la imagen
+        window.onclick = function(event) {
+            var modal = document.getElementById("modal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Funcionalidad del checkbox "Seleccionar Todas" para entradas
+        document.getElementById('seleccionar_todas_entradas').addEventListener('change', function() {
+            var checkboxes = document.querySelectorAll('input[name="eliminar[]"]');
+            for (var checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
     </script>
 
     <p><a href="dashboard.php">← Volver al menú</a></p>

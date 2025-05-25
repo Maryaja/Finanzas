@@ -1,20 +1,26 @@
 <?php
 class ReporteBalance {
     private $db;
+    private $usuarioId; // Propiedad para almacenar el ID del usuario
 
-    public function __construct($db) {
+    public function __construct($db, $usuarioId) {
         $this->db = $db;
+        $this->usuarioId = $usuarioId; // Recibir el usuarioId al instanciar la clase
     }
 
     public function obtenerTotalEntradas() {
-        $result = $this->db->query("SELECT SUM(monto) AS total FROM entradas");
-        $row = $result->fetch_assoc();
+        $stmt = $this->db->prepare("SELECT SUM(monto) AS total FROM entradas WHERE usuario_id = ?");
+        $stmt->bind_param("i", $this->usuarioId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
         return $row['total'] ?? 0;
     }
 
     public function obtenerTotalSalidas() {
-        $result = $this->db->query("SELECT SUM(monto) AS total FROM salidas");
-        $row = $result->fetch_assoc();
+        $stmt = $this->db->prepare("SELECT SUM(monto) AS total FROM salidas WHERE usuario_id = ?");
+        $stmt->bind_param("i", $this->usuarioId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
         return $row['total'] ?? 0;
     }
 
@@ -23,13 +29,17 @@ class ReporteBalance {
     }
 
     public function obtenerEntradas() {
-        $result = $this->db->query("SELECT * FROM entradas ORDER BY fecha DESC");
-        return $result->fetch_all(MYSQLI_ASSOC);
+        $stmt = $this->db->prepare("SELECT * FROM entradas WHERE usuario_id = ? ORDER BY fecha DESC");
+        $stmt->bind_param("i", $this->usuarioId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     public function obtenerSalidas() {
-        $result = $this->db->query("SELECT * FROM salidas ORDER BY fecha DESC");
-        return $result->fetch_all(MYSQLI_ASSOC);
+        $stmt = $this->db->prepare("SELECT * FROM salidas WHERE usuario_id = ? ORDER BY fecha DESC");
+        $stmt->bind_param("i", $this->usuarioId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 }
 ?>

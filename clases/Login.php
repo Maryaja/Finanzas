@@ -14,7 +14,8 @@ class Login {
         $usuario = $resultado->fetch_assoc();
 
         if ($usuario && password_verify($contrasena, $usuario['password'])) {
-            return true;
+           
+            return $usuario['id'];
         }
         return false;
     }

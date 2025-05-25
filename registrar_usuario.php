@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("ss", $usuario, $hash);
         if ($stmt->execute()) {
             $_SESSION['usuario'] = $usuario;
+            $_SESSION['usuario_id'] = $stmt->insert_id; // Guardar el ID del nuevo usuario
             header('Location: dashboard.php');
             exit;
         } else {
@@ -60,3 +61,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <p><a href="login.php">← Ya tengo una cuenta</a></p>
 </body>
+</html>

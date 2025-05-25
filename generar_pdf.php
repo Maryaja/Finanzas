@@ -1,25 +1,27 @@
-
 <?php
 require 'db/conexion.php';
 require 'clases/ReporteBalance.php';
-require 'fpdf/fpdf.php'; 
+require 'fpdf/fpdf.php';
 
 
 session_start();
 
-if (!isset($_SESSION['usuario'])) {
+if (!isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
     exit;
 }
+$usuario_id = $_SESSION['usuario_id'];
 
 
-$reporte = new ReporteBalance($db);
+// Instanciar la clase ReporteBalance PASANDO la conexión y el usuario_id
+$reporte = new ReporteBalance($db, $usuario_id);
 $totalEntradas = $reporte->obtenerTotalEntradas();
 $totalSalidas = $reporte->obtenerTotalSalidas();
 $balance = $reporte->obtenerBalance();
 $entradas = $reporte->obtenerEntradas();
 $salidas = $reporte->obtenerSalidas();
 
+// El resto del código para generar el PDF permanece igual
 $pdf = new FPDF();
 $pdf->AddPage();
 $pdf->SetFont('Arial', 'B', 16);
@@ -37,7 +39,7 @@ $pdf->Cell(0, 10, 'Entradas', 0, 1);
 
 $pdf->SetFont('Arial', '', 10);
 foreach ($entradas as $entrada) {
- $pdf->Cell(0, 8, "{$entrada['fecha']} - {$entrada['tipo']} - \$" . number_format($entrada['monto'], 2), 0, 1);
+    $pdf->Cell(0, 8, "{$entrada['fecha']} - {$entrada['tipo']} - \$" . number_format($entrada['monto'], 2), 0, 1);
 }
 
 $pdf->Ln(5);
@@ -46,7 +48,7 @@ $pdf->Cell(0, 10, 'Salidas', 0, 1);
 
 $pdf->SetFont('Arial', '', 10);
 foreach ($salidas as $salida) {
- $pdf->Cell(0, 8, "{$salida['fecha']} - {$salida['tipo']} - \$" . number_format($salida['monto'], 2), 0, 1);
+    $pdf->Cell(0, 8, "{$salida['fecha']} - {$salida['tipo']} - \$" . number_format($salida['monto'], 2), 0, 1);
 }
 
 $pdf->Output('D', 'balance_financiero.pdf');
